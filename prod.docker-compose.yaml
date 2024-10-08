@@ -1,0 +1,73 @@
+# README:
+# only need database and database admin for local dev
+
+services:
+  ollama:
+    image: ollama/ollama
+    container_name: ollama-container
+    restart: always
+    labels:
+      - autoheal=true
+    volumes:
+      - ./ollama_entrypoint.sh:/usr/local/bin/ollama_entrypoint.sh
+    entrypoint: ["/usr/bin/bash", "/usr/local/bin/ollama_entrypoint.sh"]
+  
+  chat-service:
+    container_name: fastapi-container
+    restart: always
+    labels:
+      - autoheal=true
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    environment:
+      - ENV=prod
+    depends_on:
+      - ollama
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8000/chat/api/health" ]
+      interval: 1m30s
+      timeout: 10s
+      retries: 3
+  
+  chat-client:
+    container_name: nuxt-container
+    restart: always
+    labels:
+      - autoheal=true
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - chat-service
+      - ollama
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000"]
+      interval: 1m30s
+      timeout: 30s
+      retries: 5
+      start_period: 30s
+  
+  nginx:
+    image: nginx:latest
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - chat-service
+      - chat-client
+
+  autoheal:
+    image: willfarrell/autoheal:latest
+    container_name: autoheal-container
+    restart: always
+    environment:
+      - AUTOHEAL_INTERVAL=60
+      - AUTOHEAL_START_PERIOD=300
+      - AUTOHEAL_DEFAULT_STOP_TIMEOUT=10
+    tty: true
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
