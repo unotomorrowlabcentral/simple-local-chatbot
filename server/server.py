@@ -1,7 +1,7 @@
 import uvicorn
-
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+
 from server.constants.constants import LLAMA_URL
 from server.models.ChatRequest import ChatRequest
 from server.services.ChatService import ChatService as ChatService

@@ -31,8 +31,8 @@ import { useRuntimeConfig } from "nuxt/app";
 import { nextTick, ref } from "vue";
 
 interface Message {
-  sender: string;
-  text: string;
+	sender: string;
+	text: string;
 }
 
 // define messages list and input var
@@ -44,65 +44,65 @@ const config = useRuntimeConfig();
 const apiBase = config.public.apiBase;
 
 const sendMessage = async () => {
-  // assign userInput.vaue to tmp var to clear input field and preserve msg
-  let msg = userInput.value;
+	// assign userInput.vaue to tmp var to clear input field and preserve msg
+	let msg = userInput.value;
 
-  // clear input field and scroll to bottom
-  userInput.value = "";
+	// clear input field and scroll to bottom
+	userInput.value = "";
 
-  // handle empty messages
-  if (msg.trim() === "") return;
+	// handle empty messages
+	if (msg.trim() === "") return;
 
-  // push json message obj to messages list
-  messages.value.push({ sender: "User", text: msg });
+	// push json message obj to messages list
+	messages.value.push({ sender: "User", text: msg });
 
-  // scroll to bottom after user posts message
-  await nextTick();
-  scrollToBottom;
+	// scroll to bottom after user posts message
+	await nextTick();
+	scrollToBottom;
 
-  // post to server api endpoint
-  try {
-    console.log(`${apiBase}/send-chat`);
-    const response = await fetch(`${apiBase}/send-chat`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ userMsg: msg }),
-    });
+	// post to server api endpoint
+	try {
+		console.log(`${apiBase}/send-chat`);
+		const response = await fetch(`${apiBase}/send-chat`, {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+			},
+			body: JSON.stringify({ userMsg: msg }),
+		});
 
-    // handle no response case
-    if (!response.ok) {
-      throw new Error("Network response not ok");
-    }
+		// handle no response case
+		if (!response.ok) {
+			throw new Error("Network response not ok");
+		}
 
-    const data = await response.json();
+		const data = await response.json();
 
-    // if message, push message object to messages list, else console log error
-    messages.value.push({ sender: "Bot", text: data.bot_response });
+		// if message, push message object to messages list, else console log error
+		messages.value.push({ sender: "Bot", text: data.bot_response });
 
-    // scroll to bottom after bot posts message
-    await nextTick();
-    scrollToBottom();
-  } catch (error) {
-    messages.value.push({ sender: "System", text: "Network error" });
-  }
+		// scroll to bottom after bot posts message
+		await nextTick();
+		scrollToBottom();
+	} catch (error) {
+		messages.value.push({ sender: "System", text: "Network error" });
+	}
 };
 
 // markdown to text conversion
 const parseMarkdown = (markdownText: string) => {
-  if (!markdownText) {
-    return "";
-  }
-  return marked(markdownText);
+	if (!markdownText) {
+		return "";
+	}
+	return marked(markdownText);
 };
 
 // smooth scroll to bottom of chat window
 const scrollToBottom = () => {
-  const messagesContainer = document.querySelector(".messages");
-  if (messagesContainer) {
-    messagesContainer.scrollTop = messagesContainer.scrollHeight;
-  }
+	const messagesContainer = document.querySelector(".messages");
+	if (messagesContainer) {
+		messagesContainer.scrollTop = messagesContainer.scrollHeight;
+	}
 };
 </script>
 

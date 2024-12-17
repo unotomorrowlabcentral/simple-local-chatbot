@@ -12,7 +12,6 @@ class Chat(BaseModel):
 
 
 class ChatService:
-
     @staticmethod
     async def sendChat(userMsg: str) -> dict:
         data = Chat(prompt=userMsg).model_dump()
