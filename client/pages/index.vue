@@ -1,6 +1,6 @@
 <template>
   <div class="title">
-    <h2>Chat with our LLM via the dialog box below</h2>
+    <h2>Chat with dockerized LLM via the dialog box below</h2>
   </div>
 
   <div>
